@@ -143,6 +143,9 @@ class Circulator
   # Stage a graph for the given list of players
   def initialize(players)
 
+    # we may need preprocessing if players are given as strings
+    players = parse(players) unless players.first.kind_of? Player
+
     # preprocessing the player list to ensure an optimal distribution
     # of groups
     @players = prepare_group_sort(players)
@@ -198,9 +201,44 @@ class Circulator
     end
   end
 
+  # give a short String representation of the circle c.
+  def circle_to_s(c)
+    get_circle(c).collect { |p| p.to_abrv }.join(',')
+  end
+
   def inspect
     "#<#{self.class} @players=[#{@players.collect{|p|p.to_abrv}.join(',')}]>"
   end
+
+  private
+  def parse(players)
+    players.collect { |s|
+      name,group = s.split('/')
+      Player.new(name, group)
+    }
+  end
 end
 
-# circ = Circulator.new(10,3)
+
+# usage examples:
+
+puts "=== Circles from given input:"
+circ = Circulator.new(%w(A/x B/y C/y D/z E/z F/x G/u H/u I/v J/t K/s L/s))
+(0..2).each do |i|
+  puts circ.circle_to_s(i)
+end
+
+puts "=== Circles from random input (20 players, 9 groups)"
+
+circ = Circulator.generate(20,9)
+(0..2).each do |i|
+  puts circ.circle_to_s(i)
+end
+
+puts "=== Circles from random input (groups with given sizes)"
+
+circ = Circulator.generate(34,[10,8,5,4,3,2,1,1])
+(0..2).each do |i|
+  puts circ.circle_to_s(i)
+end
+
